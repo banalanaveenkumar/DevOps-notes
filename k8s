@@ -1,0 +1,1435 @@
+K8S:
+
+vim minikunbe.sh
+
+sudo apt update -y
+sudo apt upgrade -y
+sudo apt install curl wget apt-transport-https -y
+sudo curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo mv minikube-linux-amd64 /usr/local/bin/minikube
+sudo chmod +x /usr/local/bin/minikube
+sudo minikube version
+sudo curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+sudo echo "$(cat kubectl.sha256) kubectl" | sha256sum --check
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+sudo minikube start --driver=docker --force
+
+imperative method: we use commands to create pod
+kubectl run pod1 --image nginx
+kubectl: camand line tool
+run: create 
+pod1: pod name
+nginx: image
+
+kubectl get pods
+kubectl get pod
+kubect1 get po
+kubect1 get po -o wide
+kubectl describe pod pod1 
+
+Declarivte method: we use file (manifest) to create pod
+manifest file is on yaml format.
+
+vim pod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod3
+spec:
+  containers:
+    - name: cont1
+      image: rahamshaik/moviesrepopaytm:latest
+      
+
+
+kubectl create -f pod.yml
+kubectl delete pod pod3
+
+
+DRAWBACKS:
+1. if a pod is delete we cant get back.
+
+yaml file is a specification of running  of cantainers  in kubrenates 
+
+What is pod in Kubernetes?
+A pod is the smallest execution unit in Kubernetes. A pod encapsulates one or more applications. Pods are ephemeral by nature, if a pod (or the node it executes on) fails, Kubernetes can automatically create a new replica of that pod to continue operations.
+
+Why is Kubernetes used?
+Kubernetes automates operational tasks of container management and includes built-in commands for deploying applications, rolling out changes to your applications, scaling your applications up and down to fit changing needs, monitoring your applications, and more—making it easier to manage applications.
+
+
+
+HISTORY:
+1  ll
+    2  mkdir k8s
+    3  cd k8s/
+    4  vim minikube.sh
+    5  sh minikube.sh
+    6  minikube status
+    7  kubectl get node
+    8  kubectl run pod1 --image nginx
+    9  kubectl get pods
+   10  kubectl get pod
+   11  kubectl get po
+   12  kubectl run pod2 --image rahamshaik/moviesrepopaytm:latest
+   13  kubectl get po
+   14  kubectl get po -o wide
+   15  kubectl describe pod pod1
+   16  vim pod.yml
+   17  kubectl create -f pod.yml
+   18  vim pod.yml
+   19  vim pod.yml
+   20  kubectl create -f pod.yml
+   21  kubectl get po
+   22  kubectl describe pod pod3
+   23  kubectl get po
+   24  kubectl delete pod pod3
+   25  kubectl get po
+   26  cat pod.yml
+   27  history
+===================================
+
+
+DAY-03: 24-07-2023: RS, DEPLOYMENT
+
+RS: it will create multiple replicas of same pod
+if we delete one pod it will create another
+by using labels we can identify all the replicas of pods.
+selector will select all the pods with same replicas.
+
+apiVersion: apps/v1                                                       
+kind: ReplicaSet
+metadata:
+  labels:
+    app: swiggy
+  name: swiggy-rs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+  template:
+    metadata:
+      labels:
+        app: swiggy
+    spec:
+      containers:
+      - name: cont1
+        image: rahamshaik/moviesrepopaytm:v2
+
+kubectl apply -f filename.yml
+
+kubectl get rs
+kubectl get rs -o wide
+kubectl describe rs swiggy-rs
+
+kubectl get po
+kubectl get po -o wide
+kubectl describe pod podname
+kubectl get po --show-labels
+kubectl delete po -l app=swiggy
+
+DRAWBACK:
+If we update the image replicaset will wont work here.
+
+DEPLOYMENT:
+It is more advance than RS.
+we use this on real deployment.
+
+deployment -- > replicaset -- > pods
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+  name: swiggy-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+  template:
+    metadata:
+      labels:
+        app: swiggy
+    spec:
+      containers:
+      - name: cont1
+        image: nginx
+
+kubectl apply -f filename.yml
+kubectl get deploy
+kubectl get deploy -o wide
+kubectl describe deploy swiggy-deploy
+kubectl delete deploy swiggy-deploy
+
+kubectl get po
+kubectl get po -o wide
+kubectl describe pod podname
+kubectl get po --show-labels
+kubectl delete po -l app=swiggy
+-----------------
+
+kubectl create deployment dp1 --image=ngnix
+kubectl set image deployment dp1 nginx=nginx:1.20
+kubectl rollout history deployment dp1
+kubectl rollout undo deployment dp1 --to-revision=1
+
+-------
+
+HISTORY:
+
+ 1  vim .bashrc 
+    2  source .bashrc 
+    3  vim kops.sh
+    4  sh kops.sh 
+    5  ls -a
+    6  vim .aws/config 
+    7  vim .aws/credentials 
+    8  sh kops.sh 
+    9  vim .aws/credentials 
+   10  sh kops.sh 
+   11  cat kops.sh 
+   12  export KOPS_STATE_STORE=s3://heera.k8s.local
+   13  kops validate cluster --wait 10m
+   14  kops get cluster
+   15  kubectl get no
+   16  vim abc.yml
+   17  kubectl api-resources
+   18  kubectl api-resources | grep -i replica
+   19  vim abc.yml 
+   20  cat abc.yml 
+   21  kubectl create -f abc.yml 
+   22  vim abc.yml 
+   23  kubectl create -f abc.yml 
+   24  vim abc.yml 
+   25  kubectl create -f abc.yml 
+   26  cat abc.yml 
+   27  vim abc.yml 
+   28  kubectl create -f abc.yml 
+   29  vim abc.yml 
+   30  kubectl create -f abc.yml 
+   31  vim abc.yml 
+   32  kubectl create -f abc.yml 
+   33  cat abc.yml 
+   34  kubectl delete rs swiggy-rs
+   35  vim abc.yml 
+   36  kubectl create -f abc.yml 
+   37  vim abc.yml 
+   38  kubectl create -f abc.yml 
+   39  vim abc.yml 
+   40  kubectl create -f abc.yml 
+   41  vim abc.yml 
+   42  kubectl create -f abc.yml
+43  kubectl get po
+   44  kubectl describe pod swiggy-rs-khghk
+   45  kubectl get po --show labels 
+   46  kubectl get po --show-labels 
+   47  kubectl run pod1 --image nginx
+   48  kubectl get po --show-labels 
+   49  kubectl run pod2 --image nginx
+   50  kubectl run pod3 --image nginx
+   51  kubectl get po --show-labels 
+   52  kubectl delete pod --labels app=swiggy
+   53  kubectl delete pod app=swiggy
+   54  kubectl delete --help
+   55  kubectl delete pod -l app=swiggy
+   56  kubectl get po
+   57  kubectl delete pod pod1
+   58  kubectl get po
+   59  kubectl get rs 
+   60  kubectl get rs -o wide
+   61  kubectl describe rs swiggy-rs
+   62  kubectl get po
+   63  kubectl scale rs/swiggy-rs --replicas=10
+   64  kubectl get po
+   65  kubectl get po -o wide
+   66  kubectl delete pod2 pod3
+   67  kubectl delete pod pod2 pod3
+   68  kubectl get po -o wide
+   69  kubectl scale rs/swiggy-rs --replicas=20
+   70  kubectl get po -o wide
+   71  kubectl scale rs/swiggy-rs --replicas=5
+   72  kubectl get po -o wide
+   73  kubectl delete pod swiggy-rs-khghk
+74  kubectl delete pod swiggy-rs-2fnf8
+   75  kubectl get po -o wide
+   76  cat abc.yml 
+   77  vim abc.yml 
+   78  kubectl create -f abc.yml 
+   79  kubectl get deploy
+   80  kubectl get deploy -o wide
+   81  kubectl describe deploy swiggy-deploy
+   82  kubectl describe deploy swiggy-deploy | grep -i image
+   83  kubectl edit deploy/swiggy-deploy
+   84  kubectl describe deploy swiggy-deploy | grep -i image
+   85  kubectl edit deploy/swiggy-deploy
+   86  kubectl describe deploy swiggy-deploy | grep -i image
+   87  kubectl get deploy
+   88  kubectl get rs
+   89  kubectl get pod
+   90  kubectl scale deploy/swiggy-deploy --replicas=10
+   91  kubectl get pod -o wide
+   92  cat abc.yml 
+   93  kubectl delete deploy swiggy-deploy
+   94  kubectl get rs
+   95  vim abc.yml 
+   96  kubectl create -f abc.yml 
+   97  kubectl get rs
+   98  kubectl edit rs/swiggy-rs
+   99  vim abc.yml 
+  100  kubectl create -f abc.yml 
+  101  kubectl delete rs swiggy-rs
+ 102  kubectl create -f abc.yml 
+  103  kubectl get rs
+  104  kubectl edit rs/swiggy-rs
+  105  kubectl describe rs swiggy-rs | grep -i image
+  106  kubectl get po
+  107  kubectl describe pod swiggy-rs-6x9gc
+  108  kubectl delete rs swiggy-rs
+  109  kubectl describe pod swiggy-rs-6x9gc
+  110  kubectl delete rs swiggy-rs
+  111 
+  112  kubectl delete -h
+  113  kubectl delete --help
+  114  kops get cluster
+  115  kops delete cluster --name mtpk.k8s.local --yes
+  116  history
+=========================================
+DAY-04: 25-07-2023: NAMESPACE, DEAMONSET, KUBECOLOR
+
+NAMESPACE: It is used to divide the cluster to multiple teams.
+dev team= dev namespace 
+test team= test namespace
+it is used to isloate the resources.
+
+default: if we create any resource it will go under default namespace
+kube-node-lease: if we take an object from another node it will store on this ns.
+kube-public: it will make the resource available for all users.
+kube-system: k8s will create its own resources for itself on this ns.
+
+kubectl get po -n default
+kubectl get po -n kube-node-lease
+kubectl get po -n kube-public
+kubectl get po -n kube-system
+
+
+
+kubectl config set-context --current --namespace=dev
+kubectl config view --minify
+kubectl config view --minify | grep -i namespace
+
+
+DAEMOSET: It will create one pod on all each node of the cluster.
+mainly we use if to create fluentd and elasticsearch pods to fetch logs.
+KUBECOLOR: To apply colors for the k8s
+
+wget https://github.com/hidetatz/kubecolor/releases/download/v0.0.25/kubecolor_0.0.25_Linux_x86_64.tar.gz
+tar -zxvf kubecolor_0.0.25_Linux_x86_64.tar.gz
+./kubecolor
+chmod +x kubecolor
+mv kubecolor /usr/local/bin/
+kubecolor get po
+kubecolor get po -n kube-system
+
+HISTORY:
+
+    1  vim .bashrc
+    2  source .bashrc
+    3  vim kops.sh
+    4  sh kops.sh
+    5  vim kops.sh
+    6  sh kops.sh
+    7  cat kops.sh
+    8  export KOPS_STATE_STORE=s3://heera.k8s.local
+    9  kops validate cluster --wait 10m
+   10  kubectl get ns
+   11  kubectl run pod1 --image nginx
+   12  kubectl describe pod pod1
+   13  kubectl get po
+   14  kubectl get po -ns default
+   15  kubectl get po -n default
+   16  kubectl get po -n kube-node-lease
+   17  kubectl get po -n kube-public
+   18  kubectl get po -n kube-system
+   19  kubectl get po
+   20  kubectl get ns
+   21  kubectl create ns dev
+   22  kubectl get ns
+   23  kubectl config set-context --current-namespace=dev
+   24  kubectl config set-context --current --namespace=dev
+   25  kubectl config minify
+   26  kubectl config minify
+   27  kubectl config view --minify
+   28  kubectl config view --minify | grep -i ns
+   29  kubectl config view --minify | grep -i namespace
+   30  kubectl run dev1 --image nginx
+   31  kubectl run dev2 --image nginx
+   32  kubectl run dev3 --image nginx
+   33  kubectl get po
+   34  kubectl create ns test
+   35  kubectl config set-context --current --namespace=test
+   36  kubectl config view --minify | grep -i namespace
+   37  kubectl get po
+   38  kubectl get po -n dev
+   39  kubectl get po -n dev --show-labels
+   40  vim abc.yml
+   41  kubectl create -f abc.yml
+   42  kubectl get rs
+   43  kubectl config set-context --current --namespace=dev
+   44  kubectl get rs
+   45  kubectl get rs -n test
+   46  kubectl get po -n test
+   47  kubectl get po -n test -l app=swiggy
+   48  kubectl describe pod swiggy-rs-h6ghx -n test
+   49  kubectl get ns
+   50  kubectl delete ns test
+   51  kubectl delete ns dev
+   52  kubectl get ns
+   53  kubectl config view --minify | grep -i namespace
+   53  kubectl config view --minify | grep -i namespace
+   54  kubectl config set-context --current --namespace=default
+   55  kubectl get ns
+   56  kubectl config view --minify | grep -i namespace
+   57  vim daemonset.yml
+   58  kubectl create -f daemonset.yml
+   59  kubectl get po
+   60  kubectl get po --all
+   61  kubectl get po -n --all
+   62  kubectl ap-resources
+   63  kubectl api-resources
+   64  kubectl get ds
+   65  kubectl get ds -n kube-system
+   66  vim daemonset.yml
+   67  kubectl get ds -n kube-system
+   68  alias kubectl="kubecolor"
+   69  command -v kubecolor >/dev/null 2>&1 && alias kubectl="kubecolor"
+   70  kubectl get po -n kube-system
+   71  kubecolor get po -n kube-system
+   72  vim .bashrc
+   73  source .bashrc
+   74  kubecolor get po -n kube-system
+   75   wget https://github.com/hidetatz/kubecolor/releases/download/v0.0.25/kubecolor_0.0.25_Linux_x86_64.t                                                                                                                                                                                                       
+   76  ll
+   77  tar -zxvf kubecolor_0.0.25_Linux_x86_64.tar.gz
+   78  ll
+   79  ./kubecolor
+   80  kubecolor
+   81  chmod +x kubecolor
+   82  mv kubecolor /usr/local/bin/
+   83  ls /usr/local/bin/kubecolor
+   84  kubecolor get po
+   85  kubecolor get po -n kube-system
+   86  histroy
+
+
+==================================
+==================================================
+DAY-05: 26-07-2023: SVC (CIP, NP, LB)
+
+SERVICE: it is used to expose an application.
+
+TYPES:
+1. CLUSTERIP: It will work inside the cluster.
+it will not expose to outer world.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+  name: swiggy-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+  template:
+    metadata:
+      labels:
+        app: swiggy
+    spec:
+      containers:
+      - name: cont1
+        image: rahamshaik/trainservice:latest
+        ports:
+          - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sv1
+spec:
+  type: ClusterIP
+  selector:
+    app: swiggy
+  ports:
+    - port: 80
+
+DRAWBACK:
+We cannot use app outside.
+
+2. NODEPORT: It will expose our application in a particular port.
+Range: 30000 - 32767 (in sg we need to give all traffic)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+  name: swiggy-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+  template:
+    metadata:
+      labels:
+        app: swiggy
+    spec:
+      containers:
+      - name: cont1
+        image: rahamshaik/trainservice:latest
+        ports:
+          - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: abc
+spec:
+  type: NodePort
+  selector:
+    app: swiggy
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 31111
+
+DRAWBACK:
+PORT RESTRICTION.
+
+3. LOADBALACER: It will expose our app and distribute load blw pods.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+  name: swiggy-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+  template:
+    metadata:
+      labels:
+        app: swiggy
+    spec:
+      containers:
+      - name: cont1
+        image: rahamshaik/trainservice:latest
+        ports:
+          - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: abc
+spec:
+  type: LoadBalancer
+  selector:
+    app: swiggy
+  ports:
+    - port: 80
+      targetPort: 80
+
+
+==================================================
+
+blue-green deployment :
+====================
+
+depoly1.yaml
+-------------
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+    clour: red
+  name: deploy1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+      clour: red
+  template:
+    metadata:
+      labels:
+        app: swiggy
+        clour: red
+    spec:
+      containers:
+      - name: cont1
+        image: banalanaveenkumar/resgistaionrepo:latest
+        ports:
+         - containerPort : 80
+~
+
+
+depoly2.yaml
+------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+    clour: blue
+  name: deploy2
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+      clour: blue
+  template:
+    metadata:
+      labels:
+        app: swiggy
+        clour: blue
+    spec:
+      containers:
+      - name: cont1
+        image: banalanaveenkumar/trainrepo:latest
+        ports:
+         - containerPort : 80
+~
+
+service.yaml
+------------
+apiversion : v1
+kind : service
+metadata : 
+name: service1
+spec:
+ selector:
+  matchlables:
+  app: swiggy
+ type:loadbalancer
+ ports:
+   - port:80
+     containerport: 80
+===================================================
+
+
+
+k8s volumes
+---------------
+
+In Kubernetes (often abbreviated as K8s), volumes are used to provide persistent storage to containers running within pods. Volumes allow you to store data that should persist across container restarts and rescheduling. Kubernetes provides several types of volumes to meet various storage requirements, and you can choose the most suitable one based on your application's needs. Here are some commonly used types of volumes in Kubernetes:
+
+1. EmptyDir: An EmptyDir volume is an ephemeral storage that's created when a pod is scheduled on a node and is deleted when the pod terminates. It's useful for sharing data between containers within the same pod or for temporary storage.
+
+2. HostPath: HostPath volumes mount a directory from the host node's file system into the pod. This is useful when you need to access files on the node's filesystem, but it's not recommended for production use because it can lead to portability and security issues.
+
+3. PersistentVolume (PV) and PersistentVolumeClaim (PVC): PVs and PVCs are used for managing persistent storage that is independent of a pod. PVs represent the actual storage resource, while PVCs are used by pods to request access to storage. This abstraction allows for dynamic provisioning and management of persistent storage.
+
+4. ConfigMap and Secret: ConfigMap and Secret volumes allow you to inject configuration data or secrets into a pod as files or environment variables. They are not suitable for large data storage but are great for configuring applications or passing sensitive information.
+
+5. NFS: Network File System (NFS) volumes allow you to mount a directory from an NFS server into a pod. This is a good choice when you need shared storage across multiple pods.
+
+6. Persistent Disk Volumes (e.g., GCE PD, AWS EBS, Azure Disk): Cloud providers offer block storage solutions that you can use as volumes for your pods. These volumes are attached to the pod and can be used for storing data that needs to persist beyond the pod's lifetime.
+
+7. StatefulSet: StatefulSets are used for managing stateful applications, like databases, that require stable network identities and persistent storage. StatefulSets can ensure that each pod has a unique identity and can be used with PersistentVolumes.
+
+8. CSI (Container Storage Interface): CSI is a standardized interface for connecting external storage systems to Kubernetes. It allows you to use a wide variety of storage solutions with Kubernetes, making it easier to manage different storage backends.
+
+Volumes are defined in the pod's configuration and can be mounted into one or more containers within the pod. The choice of volume type depends on your application's requirements, infrastructure, and the desired storage characteristics. You can specify the volume type and its properties in your pod configuration YAML file.
+
+
+k8s types
+---------
+1) local node type : emptyDir,hostpath,local.
+2) fileshare type : nfs(network file system)
+3) storage type : fc,iscsi
+4) special purpose type : secret, gitrepo
+5) cloud provided type : vpshere,clinder,awselasticblockstorage,azuredisk,gcep
+
+emptydir
+----------
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: empty-pod
+spec:
+  containers:
+    - name: con1
+      image: busybox:1.28
+      command: ['sh', '-c', 'while true; do echo "wellcome" >/k8s/date1.text; sleep 2000 ; done']
+      volumeMounts:
+        - name: vol1
+          mountPath: /k8s
+    - name: con12
+      image: busybox:1.28
+      command: ['sh', '-c', 'while true; do cat/k8s/date1.text; sleep 2000 ; done']
+      volumeMounts:
+        - name: vol1
+          mountPath: /k8s
+  volumes:
+    - name: vol1
+      emptyDir: {}
+
+
+
+------
+kubectl create -f po.yaml
+kubectl exec -it empty-pod -c con1 -- sh
+kubectl exec -it empty-pod -c con12 -- sh
+
+
+===============================
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: pod11
+spec:
+  containers:
+    - name: con1
+      image: busybox:1.28
+      command: ['sh', '-c', 'while true; do echo "$date" >/k8s/date1.text; sleep 2000 ; done']
+      volumeMounts:
+        - name: vol1
+          mountPath: /k8s
+    - name: con12
+      image: busybox:1.28
+      command: ['sh', '-c', 'while true; do cat/k8s/date1.text; sleep 2000 ; done']
+      volumeMounts:
+        - name: vol1
+          mountPath: /k8s
+  volumes:
+    - name: vol1
+      hostPath :
+         path: /abc
+         type: DirectoryOrCreate
+
+
+kubectl exec -it pod11 -c con1 -- sh
+ls > k8s>echo hai>nani
+
+note :
+if pod is created in worker-1
+cd/abc
+k8s nani
+
+=====================
+persistentVolume(pv):
+-----------------
+n Kubernetes, PersistentVolumes are storage resources that exist beyond the lifecycle of individual Pods. A static PersistentVolume is pre-provisioned by a cluster administrator, as opposed to dynamically provisioned through a StorageClass.
+- pv is cluster level ,not namespace
+- 
+static provising
+---------------
+pv.yaml
+-------
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gcp-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  gcePersistentDisk:
+    pdName: my-gce-disk
+    fsType: ext4
+
+Persistent Volume Claim:
+-----------------------
+A PersistentVolumeClaim (PVC) in Kubernetes is a request for storage by a user. It's used to claim a PersistentVolume (PV), which is a piece of storage in the cluster offered by the administrator. PVCs and PVs work together to provide a way for developers to use storage resources without having to know the details about the underlying infrastructure.
+-it is namespace level
+pvc.yaml
+--------
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+-------------
+pod.yaml
+--------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mycontainer
+    image: ngnix
+    volumeMounts:
+    - mountPath: "/data"
+      name: myvolume
+  volumes:
+  - name: myvolume
+    persistentVolumeClaim:
+      claimName: pvc1
+----
+storageclass:
+-----------
+Once the StorageClass is defined, developers can create PersistentVolumeClaims (PVCs) and reference the appropriate StorageClass in the storageClassName field within the PVC to request storage that conforms to the class's specifications.
+
+This enables dynamic provisioning based on the defined StorageClass whenever a PVC is created, ensuring that the requested storage is provisioned according to the predefined GCP storage settings.
+sc.yaml
+-------
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: sc1
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-ssd
+  
+pvc.yaml
+-------
+piVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim
+spec:
+  accessModes:
+   - ReadWriteOnce
+  resources:
+    requests:
+     storage: 10Gi
+  storageClassName: sc1
+
+pod.yaml
+--------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mycontainer
+    image: ngnix
+    volumeMounts:
+    - mountPath: "/data"
+      name: myvolume
+  volumes:
+  - name: myvolume
+    persistentVolumeClaim:
+      claimName: pvc1
+
+nodeSelector
+-----------
+
+pods will scheduled on paticuar node by useing label.
+
+1) list your nodes in cluster ,along with labels
+
+kubectl get nodes --show-labels
+
+2) add a node to labels
+
+kubectl label node worker-1 disktype=ssd
+
+3) to show labele on particular node
+
+kubectl describe node worker-1 | grep -i taint
+
+4) unlabeled paticular node
+
+kubectl label nodes worker-1 disktype-
+
+
+dp.yaml
+---------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+    clour: blue
+  name: deploy2
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+      clour: blue
+  template:
+    metadata:
+      labels:
+        app: swiggy
+        clour: blue
+    spec:
+      containers:
+      - name: cont1
+        image: banalanaveenkumar/trainrepo:latest
+        ports:
+         - containerPort : 80
+
+      nodeSelector:
+          disktype: "ssd"
+================
+node-affinity
+-------------
+Node Affinity in Kubernetes allows you to control the scheduling of pods to specific nodes based on attributes or node labels. With Node Affinity, you can optimize the placement of pods according to your specific requirements.
+
+📌On the other hand, Anti-Affinity helps prevent co-location of pods on the same node, thus promoting high availability and fault tolerance. 
+
+node-affinity is two types
+1) requiredDuringSchedulingIgnoredDuringExecution:
+2)preferredDuringSchedulingIgnoredDuringExecution:
+
+1) requiredDuringSchedulingIgnoredDuringExecution:
+--------------------------------------------------
+
+- admin can manage the node labels
+- developer can write manifest files
+
+- node labels not match pods will be pending.
+- after pod scheduled ,admin can change label on node  doesnot effect on pods.
+- if we want change pods changes we again manfest file.
+
+dp.yaml
+-------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+    clour: blue
+  name: deploy23
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+      clour: blue
+  template:
+    metadata:
+      labels:
+        app: swiggy
+        clour: blue
+    spec:
+      containers:
+      - name: cont1
+        image: banalanaveenkumar/trainrepo:latest
+        ports:
+         - containerPort : 80
+      affinity:
+       nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: disktype
+              operator: In
+              values:
+              - ssd
+
+
+2)preferredDuringSchedulingIgnoredDuringExecution:
+--------------------------------------------------
+- pod scheuled on nodes matching node (or) if not match (or) not enough resource for creating pod in node the pods will created in other nodes 
+- this condiation pods are not pending.
+
+
+dp12.yaml
+--------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+  name: swiggy-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+  template:
+    metadata:
+      labels:
+        app: swiggy
+    spec:
+      containers:
+      - name: cont1
+        image: nginx
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: disktype
+                operator: In
+                values:
+                - ssd
+~
+===========================
+
+taint and tolarance:
+--------------------
+"taints" and "tolerations" are mechanisms used to control which nodes can run specific pods.
+
+A "taint" is a property assigned to a node that repels certain pods. It's like saying, "Hey, only pods that are okay with this particular condition can run on me." Taints are set on nodes by administrators.
+
+On the other hand, "tolerations" are properties specified by pods that allow them to tolerate (or accept) nodes with certain taints. So, a pod with the right toleration can happily run on a node with a corresponding taint.
+
+
+1)You add a taint to a node using kubectl taint. For example,
+
+kubectl taint nodes worker1 disktype=ssd:NoSchedule
+
+2)To remove the taint added by the command above, you can run:
+
+kubectl taint nodes worker-1 disktype=ssd:NoSchedule-
+
+3)to show tainti nodes
+ kubectl describe nodes | grep -i taint
+
+
+NoExecute:
+----------
+This affects pods that are already running on the node as follows:
+Pods that do not tolerate the taint are evicted immediately
+Pods that tolerate the taint without specifying tolerationSeconds in their toleration specification remain bound forever
+Pods that tolerate the taint with a specified tolerationSeconds remain bound for the specified amount of time. After that time elapses, the node lifecycle controller evicts the Pods from the node.
+
+NoSchedule:
+----------
+No new Pods will be scheduled on the tainted node unless they have a matching toleration. Pods currently running on the node are not evicted.
+
+PreferNoSchedule:
+-----------------
+PreferNoSchedule is a "preference" or "soft" version of NoSchedule. The control plane will try to avoid placing a Pod that does not tolerate the taint on the node, but it is not guaranteed.
+
+dp.yaml
+---------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+  name: swiggy-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+  template:
+    metadata:
+      labels:
+        app: swiggy
+    spec:
+      containers:
+      - name: cont1
+        image: nginx
+      tolerations:
+        - key: "disktype"
+          operator: "Equal"
+          value: "ssd"
+          effect: "NoSchedule"
+~===============================
+podaffinity
+-----------:
+Inter-pod affinity and anti-affinity allow you to constrain which nodes your Pods can be scheduled on based on the labels of Pods already running on that node, instead of the node labels.
+
+Inter-pod affinity and anti-affinity rules take the form "this Pod should (or, in the case of anti-affinity, should not) run in an X if that X is already running one or more Pods that meet rule Y", where X is a topology domain like node, rack, cloud provider zone or region, or similar and Y is the rule Kubernetes tries to satisfy.
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-affinity
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:
+            - S1
+        topologyKey: topology.kubernetes.io/zone
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security
+              operator: In
+              values:
+              - S2
+          topologyKey: topology.kubernetes.io/zone
+  containers:
+  - name: with-pod-affinity
+    image: registry.k8s.io/pause:2.0
+
+==================================
+ConfigMap
+--------
+A ConfigMap is an API object used to store non-confidential data in key-value pairs. Pods can consume ConfigMaps as environment variables, command-line arguments, or as configuration files in a volume.
+
+A ConfigMap allows you to decouple environment-specific configuration from your container images, so that your applications are easily portable.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: game-demo
+data:
+  # property-like keys; each key maps to a simple value
+  player_initial_lives: "3"
+  ui_properties_file_name: "user-interface.properties"
+
+  # file-like keys
+  game.properties: |
+    enemy.types=aliens,monsters
+    player.maximum-lives=5    
+  user-interface.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true   
+
+
+cm.yaml
+-------
+
+apiVersion : v1
+kind : ConfigMap
+metadata : 
+ name : cm1
+data :
+  name : nani
+  course : k8s
+
+1)env
+======:
+
+pod.yaml
+--------
+apiVersion: v1
+kind: Pod
+metadata:
+    name: pod12
+spec:
+  containers:
+   - name: container
+     image: busybox
+     command: ["/bin/sh", "-c","echo $CONFIG1"]
+     env:
+       - name: CONFIG1
+         valueFrom:
+           configMapKeyRef:
+              name: cm1
+              key: course
+
+
+
+to verify
+
+kubectl logs pod12
+
+2)volume-mount
+---------------:
+
+pod.yaml
+--------
+apiVersion: v1
+kind: Pod
+metadata:
+   name: pod263
+spec:
+   containers:
+      - name: con1
+        image: busybox:1.28
+        command: ['sh', '-c', 'while true; do sleep 60 ; done']
+        volumeMounts:
+           - name: vol12
+             mountPath: /nani
+                                                                    
+   volumes:
+     - name: vol12
+       configMap:
+         name: cm1
+
+to verify
+kubectl exec -it pod263 -- sh
+
+=============================
+Secrets
+-------
+
+ Secret is an object that contains a small amount of sensitive data such as a password, a token, or a key. Such information might otherwise be put in a Pod specification or in a container image. Using a Secret means that you don't need to include confidential data in your application code.
+
+types of secrets
+1) opaque
+2) Docker-registry
+3) TLS 
+4) service account
+
+1) opaque : the most common type secret .it allows you to store orbietry key value pairs as base64- encoded strings. it is suitable for storing generel purpose senstive information.  
+----------
+
+2) Docker-registry
+-------------------: used for storing creadintials to autnthaticates with private docker-registry. it indicates the servers username ,password,and emails fileds.
+3) TLS 
+------: used for storing TLS certificates and private keys . it includes the tls.crts and tls.keys fields.
+
+4) service account
+------------------: automatically created secrets that provide ceredentials for acceesing the k8s api.they are associated with service accounts and allows pods to aunthoncticte with the api server.
+sc.yaml
+--------
+apiVersion : v1
+kind : secret
+metadata : 
+ name : sc1
+type: opaque
+data :
+  name : 123dffddz
+  course : 12wsded
+
+pod.yaml
+--------
+apiVersion: v1
+kind: Pod
+metadata:
+    name: pod12
+spec:
+  containers:
+   - name: container
+     image: busybox
+     command: ["/bin/sh", "-c","echo $SVC"]
+     env:
+       - name: SVC
+         valueFrom:
+           secretKeyRef:
+              name: sc1
+              key: course
+po123.yaml
+----------
+apiVersion: v1
+kind: Pod
+metadata:
+   name: pod263
+spec:
+   containers:
+      - name: con1
+        image: busybox:1.28
+        command: ['sh', '-c', 'while true; do sleep 60 ; done']
+        volumeMounts:
+           - name: vol12
+             mountPath: /nani                                                                  
+  volumes:
+     - name: vol12
+       secret:
+         secretname: cm1
+
+
+===================================
+
+ingress-controller
+-----------------
+In Kubernetes, an Ingress Controller is an essential component responsible for managing external access to services within a cluster. It acts as an API object that manages external access to services within a Kubernetes cluster, typically providing HTTP and HTTPS routing.
+
+The Ingress resource itself is an API object that manages external access to services within a cluster. It allows defining how incoming requests should be routed to different services based on rules and configurations. However, it's the Ingress Controller's responsibility to interpret and enforce these rules set in the Ingress resource.
+
+Key points about Ingress Controllers:
+
+Routing and Traffic Rules: Ingress Controllers provide a way to define rules that specify how incoming requests should be directed to the appropriate services within the cluster.
+
+Load Balancing and TLS Termination: Ingress Controllers often offer functionalities like load balancing across multiple pods, termination of SSL/TLS connections, and routing based on HTTP path, hostname, etc.
+
+Multiple Implementations: There are various Ingress Controller implementations available, such as Nginx, Traefik, HAProxy, and more. These implementations might differ in terms of features, capabilities, and ease of configuration.
+
+Customization and Configuration: Users can configure the behavior of an Ingress Controller by setting annotations within the Ingress resource or by modifying the Ingress Controller's configuration directly.
+
+Compatibility: Ingress Controllers might have different levels of compatibility with the Kubernetes environment and features. Users should choose the Ingress Controller that best fits their requirements and infrastructure.
+
+To use an Ingress Controller, you typically need:
+
+An Ingress Controller installed in your cluster (you can deploy a supported controller of your choice).
+An Ingress resource defined in your Kubernetes manifest, specifying rules for routing and managing external access.
+For example, to use NGINX as your Ingress Controller:
+
+
+
+In Kubernetes, an Ingress Controller is an essential component responsible for managing external access to services within a cluster. It acts as an API object that manages external access to services within a Kubernetes cluster, typically providing HTTP and HTTPS routing.
+
+The Ingress resource itself is an API object that manages external access to services within a cluster. It allows defining how incoming requests should be routed to different services based on rules and configurations. However, it's the Ingress Controller's responsibility to interpret and enforce these rules set in the Ingress resource.
+
+Key points about Ingress Controllers:
+
+Routing and Traffic Rules: Ingress Controllers provide a way to define rules that specify how incoming requests should be directed to the appropriate services within the cluster.
+
+Load Balancing and TLS Termination: Ingress Controllers often offer functionalities like load balancing across multiple pods, termination of SSL/TLS connections, and routing based on HTTP path, hostname, etc.
+
+Multiple Implementations: There are various Ingress Controller implementations available, such as Nginx, Traefik, HAProxy, and more. These implementations might differ in terms of features, capabilities, and ease of configuration.
+
+Customization and Configuration: Users can configure the behavior of an Ingress Controller by setting annotations within the Ingress resource or by modifying the Ingress Controller's configuration directly.
+
+Compatibility: Ingress Controllers might have different levels of compatibility with the Kubernetes environment and features. Users should choose the Ingress Controller that best fits their requirements and infrastructure.
+
+To use an Ingress Controller, you typically need:
+
+An Ingress Controller installed in your cluster (you can deploy a supported controller of your choice).
+An Ingress resource defined in your Kubernetes manifest, specifying rules for routing and managing external access.
+For example, to use NGINX as your Ingress Controller:
+
+1).Install NGINX Ingress Controller in your cluster.
+
+for bare-metals:
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/baremetal/deploy.yaml
+
+
+2).Create an Ingress resource with rules for routing traffic.
+Here is a basic example of an Ingress resource manifest:
+
+vi.ingress.yaml
+---------------
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  annotations :
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-regex : "true"
+spec:
+  ingressClassName : nginx
+  rules:
+    - http:
+        paths:
+        - path: /red
+          pathType: Prefix
+          backend:
+            service:
+              name: abc
+              port:
+                number: 80
+        - path: /blue
+          pathType: Prefix
+          backend:
+            service:
+              name: service2
+              port:
+                number: 80
+
+--------------------------
+two depolys and service
+vi.dp.yaml
+---------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swiggy
+  name: swiggy-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: swiggy
+  template:
+    metadata:
+      labels:
+        app: swiggy
+    spec:
+      containers:
+      - name: cont1
+        image: rahamshaik/trainservice:latest
+        ports:
+          - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: abc
+spec:
+  type: NodePort
+  selector:
+    app: swiggy
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 31111
+
+-----------------
+vi dp2.yaml
+----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: web
+  name: swiggy-deploy2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: cont1
+        image: banalanaveenkumar/resgistaionrepo:latest
+        ports:
+          - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service2
+spec:
+  type: NodePort
+  selector:
+    app: web
+  ports:
+    - port: 82
+      targetPort: 80
+      nodePort: 32222
+-----------------
+
+root@k8smaster:~# kubectl get ing
+NAME          CLASS   HOSTS   ADDRESS   PORTS   AGE
+app-ingress   nginx   *                 80      96s
+
+
+root@k8smaster:~# kubectl get svc -n ingress-nginx
+NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx-controller             LoadBalancer   10.99.44.2      <pending>     80:31354/TCP,443:30502/TCP   2d
+ingress-nginx-controller-admission   ClusterIP      10.111.73.234   <none>        443/TCP                      2d
+root@k8smaster:~# vi ingress.yaml
+
+we can check url
+
+workernode-public-ip:ingress-nginx-controller-port/path-prefix
+http://35.200.234.40:31354/blue
+http://35.200.234.40:31354/red
+=====================
