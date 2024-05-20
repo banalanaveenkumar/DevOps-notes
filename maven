@@ -1,0 +1,36 @@
+MAVEN:
+
+INSTALL:
+
+wget https://dlcdn.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz
+tar -zxvf apache-maven-3.8.8-bin.tar.gz
+cd apache-maven-3.8.8-bin.tar.gz
+
+yum install java-1.8.0-openjdk -y
+java -version
+yum install maven -y
+mvn --version
+yum install tree -y
+
+WORKING WITH PROJECT:
+mvn archetype:generate	: To generate the project structure
+
+Define value for property 'groupId': raham
+Define value for property 'artifactId': swiggy
+Define value for property 'version' 1.0-SNAPSHOT: :
+Define value for property 'package' raham: : devops
+
+mvn compile: to compile the code (.java=.class)
+mvn test: to test the code (Apptest.java=Apptest.class)
+mvn package: to generate jar file on the project folder
+mvn install: to generate jar file on the maven folder
+mvn clean: to clear the source code
+
+mvn clean package: to will do the above actions
+
+
+TO DEPLOY APPLICATION IN MAVEN
+-------------------------------
+
+java -jar/target/snapchat.04 jar
+         -------------------------------------(path of the jar file)
