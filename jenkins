@@ -1,0 +1,222 @@
+19-06-2023: intro, setup, ci, custom workspace, shell 
+
+CI - CONTINOUS INTEGRATION (BUILD + TEST) = OLD CODE WITH NEW CODE
+CD - CONTINOUS DELIVERY		: Deployment to production is manual
+CD - CONTINOUS DEPLOYMET	: Deployment to production is automated
+
+ENV:
+DEV	: DEVELOPERS
+TEST	: TESTER
+STAGING	: BEFORE PRODUCTION
+UAT	: CLIENT
+PROD	: USERS (LIVE)
+
+PRE/NON PROD: DEV, TEST, UAT, STATING.
+HIGH AVAILABILTY - MORE THAN ONE SERVER. (ONE -1A, TWO - 1B)
+
+PIPELINE: 
+SERIES OF EVENTS INTERNINKED WITH EACH OTHER.
+STEP BY STEP EXECUTION OF A PROCESS.
+
+JENKINS: PORT - 8080
+
+SETUP:
+STEP-1: GETTING REP0 (jenkins.io -- > downloads -- > Redhat)
+sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+STEP-2: INSTALLING JAVA 11
+amazon-linux-extras install java-openjdk11 -y
+
+STEP-3: INSTALLING GIT JENKINS MAVEN 
+yum install git maven jenkins -y
+
+STEP-4: STARTING THE SERVICE (any service will be on stopped state when its installed)
+systemctl start jenkins
+systemctl status jenkins
+
+STEP-5: CONNECTING TO JENKINS
+Public-ip:8080 -- > browser
+
+
+CUSTOM WORKSPACE: it will gives the output on our desired location.
+
+mkdir -p swiggy/jenkinsbuilds/
+cd /root/swiggy/jenkinsbuilds
+
+jenkins ui -- > jobname -- > configure -- > advance -- > custom workspace -- > /root/swiggy/jenkinsbuilds -- > save
+chown jenkins:jenkins /root
+chown jenkins:jenkins /root/*
+
+
+21-06=2023: PARAMETERS, VARIABLES
+
+Parameters are the inputs given by the user while building.
+
+1. USER DEFINED PARAMETERS: this parameters can be given by user only.
+
+a. Choice parameter: used when we have multiple options to generate a build but need to use only on specific one.
+b. String Parameter: it passess user input in single line.
+c. Multi Line string parameter: it passess user input in Multi line.
+d. File Parameter: It is used to build local files on jenkins.
+e. Boolean Parameter: it is used for yes or no options.
+
+2. VARIABLES: which will store the values & changes as per the time.
+
+a. USER DEFINED VARS: 
+1. LOCAL VARS: it will work inside a job
+
+name=siva
+loc=hyderabad
+echo "hai all my name is $name, $name is comming from $loc"
+
+
+2. GLOBAL VARS: it will work outside of a job
+Dashboard -- > Manage Jenkins -- > System -- > Environment vars -- > add 
+
+b. JENKINS ENVIRONMENT VARS: it can be defined by user
+
+
+DAY-03: 
+
+CRONJOB: To schedule the works
+
+*	: Minutes
+*	: Hours
+*	: Date
+*	: Month
+*	: day (0=sun)
+
+9:00 am 23 : 0 9 23 6 5
+10:30 pm 22: 30 22 22 6 4
+
+POLLSCM: It will set a time limit if the source code change on that time it will build.
+
+WEBHOOKS: If the developer changes the code then it will build at that point of time.
+
+THROTTLE BUILD: To restric the number of builds for time(M,H,D,W,M)
+
+PASSWORDLESS LOGIN: 
+cd /var/lib/jenkins
+vim config.xml -- > line 7 : true=false -- > :wq
+systemctl restart jenkins
+
+LINKED JOBS: one job is depending on another job.
+
+
+DAY-04:
+
+PIPELINE: 
+Series of events interlinked with each other.
+Step-by-step execution of a process.
+
+TYPES:
+1. SCRIPTED
+2. DECLARTIVE  -- > SHORTCUT: PASSS
+
+
+examples:1
+-----------
+
+pipeline {
+    agent any 
+    
+    stages {
+        stage('one') {
+            steps {
+                sh 'touch file1'
+            }
+        }
+    }
+}
+
+example:2
+---------
+
+
+MASTER-SLAVE:
+1. it will distribute the builds
+2. it will reduce load on master
+3. it will reduce the memory useage of master
+
+CREATE A SERVER AND INSTALL JAVA-11
+amazon-linux-extras install java-openjdk11 -y
+
+Dashboard  Manage Jenkins Manage Nodes & clouds -- > New node -- > Name -- > Permanent Agent
+
+Number of executors - no of builds paralelly (3)
+Remote root directory - where your builds will be stored (/tmp)
+Labels - assigning job to slave (swiggy)
+Usage - last options
+Launch method - last option
+host - 172.31.82.90 (privateip)
+Credentials -- > add -- > kind: ssh username with privatekey -- > username: ec2-usrer -- > privatekaey -- > add -- > pem -- > add -- > select ec2-user -- > Host Key Verification Strategy - last option
+
+example:1
+----------
+
+pipeline {
+    agent {
+     node{
+   lable'swiggy'
+     }
+    } 
+    
+    stages {
+        stage('one') {
+              steps {
+                sh 'touch file1'
+            }
+        }
+    }
+}
+
+pipeline {
+    agent {
+        node {
+          label'naveen'
+        }
+    }
+    stages{
+        stage('one') {
+            steps {
+                sh'echo "haii alll"'
+            }
+        }
+    }
+}
+
+27-06-2023:
+
+RBAC	: ROLE BASED ACCESS CONTROL
+To restrict the jenkins Control for the users.
+authentication - who can signin
+authorization - who can work
+
+user-1: EXP (rajesh)           user-2:FRESHER (raju)	USER-3: FRESHER
+
+1. USERS: Dashboard -- > Manage Jenkins -- > security -- > Users (crearte 2 users)
+2. PLUGIN: Dashboard -- > Manage Jenkins -- > Plugins -- > Available plugins -- > Role-based Authorization Strategy  -- > install -- > goback to top
+3. Dashboard  -- > Manage Jenkins -- > Security -- > Authorization: Role-Based strategy
+4. ROLES : Dashboard  -- > Manage Jenkins -- > Security -- > Manage and Assign Roles -- >
+   create Fresher & Experience roles and give permissions(EXP: ADMIN, FRE: BUILD AND READ)
+5. ASSIGN ROLES: user-1: EXP           user-2:FRESHER
+
+backups
+----------
+download the plugins thin backups,backups
+
+configuer the bacukps job builds and restore the path
+
+LIST VIEW: USED TO SEPERATE/FILTER THE JOBS.
+MY VIEW: USED TO SHOW THE JOBS WHICH I HAVE PERMISSIONS.
+BUILD PIPELINE VIEW: To show the process of linked jobs -- > PLUGINS -- > AVAILABLE -- > Build Pipeline -- > INSTALL
+
+jenkins port changes
+------------------------
+vim /usr/lib/systemd/system/jenkins.sevice
+
+reload the background servives & restart jenkins service
+-------------------------------------------------------
+systamctl dameon-reload
+systemctl restart jenkins
