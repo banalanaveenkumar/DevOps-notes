@@ -1,0 +1,822 @@
+Docker is a set of platform as a service (PaaS) products that use OS-level virtualization to deliver software in packages called containers
+
+Docker is a tool that is used to automate the deployment of applications in lightweight containers so that applications can work efficiently in different environments in isolation.
+
+MONOLITIC: Multiple services on a single server with single db
+
+MICROSERVICES: Multiple services on Multiple servers with Multiple db
+
+SERVER = CONTAINERS = VM
+
+CONTAINER: It's like a VM without OS.
+IMAGE: It will have os/software & pkg.
+SERVER (AMI) = CONTAINER (image)
+DOCKER: It's a containerization tool.
+
+containerization: the process of packing an application with its dependencies.
+os level of virtualization.
+
+virtualization is Hardware level   ( it is process of server logically shared multifull servers)
+containerization is OS level
+
+what is docker image?
+---------------------
+docker is a read-only template that containes set of instructions for creating container that can be run on the docker flatform.
+it provides convenient way to package up applications and preconfigured server environment.which can use  for your own private use or share publicaly with other docker users.
+  
+INSTALL:
+yum install docker -y
+service  docker start
+service  docker status
+
+COMMANDS:
+docker images: to show a list of images
+docker pull ubuntu: to get ubuntu image
+docker run ubuntu: to create a container
+docker run -it --name cont2 ubuntu: it will create cont2 with interactive mode      (-it means intractive terminal) (-d means detatch/demon mode)
+
+docker ps -a: to show list of  all containers
+
+note: container delate before the stop conatiners.
+====
+docker stop <container name/container id> to stop the conatiner
+docker rm <container name/container id> to delete/remove the conatiner
+docker rmi <image:v1> to remove the image
+docker rm $(docker ps -a -q): to remove all the containers at a time.
+ docker container prune : to remove all the containers at a time 
+OS LEVEL OF VIRTUALIZATION:
+cat /etc/os-release
+apt update -y   ---TO show the update packages
+apt upgrade -y   --- update the packages  
+
+apt = package manager = advance pacakger tool
+
+touch file{1..5}
+apt install apache2 maven -y
+ctrl p q: to exit from container
+docker attach cont123 : to intractive with   container .
+
+- To container to creat image
+
+docker commit <container-name/ID> <image-name>  
+
+note : we have cannot take creat containers to images because
+
+DOCKER FILE:
+It is an automated way to create images.or customise the images
+it will have components, which are in capital letters.
+in Dockerfile D must be capital.
+
+BUILD -- > To run the docker file
+command: docker build -t <image_name:v> path_of_Dockerfile
+
+FROM: base image
+RUN: executes Linux commands (image creation)
+CMD: executes Linux commands (container creation)
+ENTRYPOINT: It will override the command.
+COPY: copies the local file to container
+ADD: copies the internet file to container (or) extract the files
+WORKDIR: Opens the required folder 
+ENV: To pass the env variables (inside container)
+ARGS: To pass the env variables (outside container)
+labels: to attach label to conatiner
+
+EXAMPLE-1: vim Dockerfile
+FROM ubuntu
+RUN apt update -y
+RUN apt install apache2 -y
+RUN apt install maven -y
+RUN apt install mysql-server -y
+
+EXAMPLE-2: vim Dockerfile
+FROM ubuntu
+RUN apt update -y
+RUN apt install apache2 -y
+RUN apt install maven -y
+RUN apt install mysql-server -y
+CMD apt install default-jdk -y
+
+EXAMPLE-3: vim Dockerfile
+FROM ubuntu
+RUN apt update -y
+RUN apt install apache2 -y
+RUN apt install maven -y
+RUN apt install mysql-server -y
+COPY abc.txt /tmp
+COPY raham.txt /tmp
+ADD https://dlcdn.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz /tmp
+
+EXAMPLE-4: vim Dockerfile
+FROM ubuntu
+RUN apt update -y
+RUN apt install apache2 -y
+RUN apt install maven -y
+RUN apt install mysql-server -y
+COPY abc.txt /tmp
+COPY raham.txt /tmp
+ADD https://dlcdn.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz /tmp
+WORKDIR /tmp
+ENV name raham
+LABEL email rahamshaik007
+
+DEPLOYMENT:
+
+Dockerfile
+FROM ubuntu
+RUN apt-get update -y
+RUN apt-get install apache2 -y
+COPY index.html /var/www/html/
+CMD ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
+
+CODE:
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+
+/* Full-width input fields */
+input[type=text], input[type=password] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Set a style for all buttons */
+button {
+  background-color: #04AA6D;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* Extra styles for the cancel button */
+.cancelbtn {
+  width: auto;
+  padding: 10px 18px;
+  background-color: #f44336;
+}
+
+/* Center the image and position the close button */
+.imgcontainer {
+  text-align: center;
+  margin: 24px 0 12px 0;
+  position: relative;
+}
+
+img.avatar {
+  width: 40%;
+  border-radius: 50%;
+}
+
+.container {
+  padding: 16px;
+}
+
+span.psw {
+  float: right;
+  padding-top: 16px;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button (x) */
+.close {
+  position: absolute;
+  right: 25px;
+  top: 0;
+  color: #000;
+  font-size: 35px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: red;
+  cursor: pointer;
+}
+
+/* Add Zoom Animation */
+.animate {
+  -webkit-animation: animatezoom 0.6s;
+  animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+  from {-webkit-transform: scale(0)} 
+  to {-webkit-transform: scale(1)}
+}
+  
+@keyframes animatezoom {
+  from {transform: scale(0)} 
+  to {transform: scale(1)}
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+  span.psw {
+     display: block;
+     float: none;
+  }
+  .cancelbtn {
+     width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+
+<h2>DevOps By Raham V:2.0</h2>
+
+<button onclick="document.getElementById('id01').style.display='block'" style="width:auto;">Login</button>
+
+<div id="id01" class="modal">
+  
+  <form class="modal-content animate" action="/action_page.php" method="post">
+    <div class="imgcontainer">
+      <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+      <img src="img_avatar2.png" alt="Avatar" class="avatar">
+    </div>
+
+    <div class="container">
+      <label for="uname"><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" name="uname" required>
+
+      <label for="psw"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" name="psw" required>
+        
+      <button type="submit">Login</button>
+      <label>
+        <input type="checkbox" checked="checked" name="remember"> Remember me
+      </label>
+    </div>
+
+    <div class="container" style="background-color:#f1f1f1">
+      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+      <span class="psw">Forgot <a href="#">password?</a></span>
+    </div>
+  </form>
+</div>
+
+<script>
+// Get the modal
+var modal = document.getElementById('id01');
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+
+</body>
+</html>
+
+====================================================================
+
+CMD
+----
+
+Dockerfile
+
+FROM centos:centos7
+CMD ["yum", "-y", "install", "git"]
+
+docker build -t demoimage .
+docker run demoimage tree
+we have get the entair command replasced the tree (it dosent work)
+docker run demoimage yum -y install tree (tree installing)
+
+entrypont
+----------
+
+FROM centos:centos7
+ENTRYPOINT ["yum", "-y", "install", "git"]
+
+docker build -t demoimage .
+docker run demoimage tree
+
+installing tree and git runing the container
+argement will be apend to entrypont instraction
+
+
+both CMD&ENTRYPONT
+-------------
+FROM centos:centos7
+ENTRYPOINT ["yum", "-y", "install"]
+CMD ["git"]
+
+docker build -t demoimage .
+docker run demoimage tree
+
+installing only paticulr pakages tree
+
+FROM centos:centos7
+ENTRYPOINT ["yum", "-y", "install", "git"]
+ENTRYPOINT ["yum", "-y", "install", "tree"]
+
+docker build -t demoimage .
+docker run demoimage 
+excute the last entrtpont instaction will be excuted.
+
+
+FROM centos:centos7
+CMD ["yum", "-y", "install", "git"]
+CMD ["echo", "hai"]
+
+it excute last cmd instaction will be excuted.
+
+===================
+
+
+volumes:
+to store data in container.
+volume means a directory.
+single volume can be shared to multiple containers.
+but at a single time we can share a volume to single conatiners.
+
+CREATION OF VOLUMES:
+
+1. Dockerfile
+
+FROM ubuntu
+VOLUME ["/vol1"]
+
+docker build -t swiggy:v1 .
+
+docker run -it --name cont1 swiggy:v1
+cd vol1
+touch file{1..5} -- > exit
+
+docker run -it --name cont2 --volumes-from cont1 --privileged=true ubuntu
+cd vol1
+
+2. FROM COMMAND:
+
+docker run -it --name cont3 -v /vol2 ubuntu
+cd vol2
+touch java{1..5} -- > exit
+
+docker run -it --name cont4 --volumes-from cont3 --privileged=true ubuntu
+
+3. MOUNTING A VOLUME: volume is created on local and attach to container
+
+docker volume ls	: to see list of volumes
+docker volume create vol3: to create a volume
+docker inspect volume vol-name: to get complete information of volume
+docker volume rm vol4 : to remove the volume
+
+create volume
+inspect volume
+cd mountpoint 
+create files
+docker run -it --name cont5 --mount "source=vol3,destination=/abc" ubuntu
+
+4. LOCAL -- > CONTAINER
+cd /home/ec2-user
+create some files
+
+docker run -it --name cont7 -v /home/ec2-user:/abcd ubuntu
+
+
+
+================================================================
+
+Docker networks are a fundamental concept in Docker that enable containers to communicate with each other and with the outside world. They provide isolated and secure communication channels for containers, allowing you to control how containers discover and interact with each other. Docker networks offer several benefits:
+
+Isolation: Containers within a network can communicate with each other while remaining isolated from containers in other networks. This isolation enhances security and prevents unintended interactions.
+
+Automatic DNS Resolution: Docker provides built-in DNS resolution for container names within the same network, making it easy for containers to locate and communicate with each other using container names.
+
+Scalability: Networks help manage container communication in a scalable and organized manner, especially in complex applications with multiple containers.
+
+Security: You can define firewall rules and access controls for containers within a network to control which containers can communicate with each other and external resources.
+
+Docker provides several types of networks:
+
+Bridge Network: This is the default network created when you run a container without specifying a network. Containers on the same bridge network can communicate with each other by container name. Docker also creates an internal DNS server for name resolution.
+
+Host Network: When you run a container in the host network mode, it shares the network namespace with the host machine. This means the container can access network services directly as if it were running on the host itself. This mode may be used when you need to bind to specific host ports.
+
+Overlay Network: Overlay networks are used in Docker Swarm mode for container orchestration across multiple hosts. They allow containers to communicate with each other regardless of which host they are running on.
+
+Macvlan Network: Macvlan networks allow you to assign a MAC address to each container, making them appear as if they are physical devices on your network. This can be useful for scenarios where you want containers to have their own unique network identity.
+
+Custom Bridge Networks: You can create custom bridge networks to isolate and manage communication between specific containers. This is often useful in multi-container applications where you want to control their interaction.
+
+To create a custom network in Docker, you can use the docker network create command, specifying the network name and optional settings like subnet, gateway, and driver.
+
+Here's an example of creating a custom bridge network:
+
+bash
+Copy code
+docker network create my_network
+You can then connect containers to this network when you run them:
+
+bash
+Copy code
+docker run --network my_network my_container
+Docker networks are a powerful feature for managing container communication and can help you build complex and scalable applications with Docker
+
+
+DOCKER COMPOSE:  to creat mulipule cantainers on single node .
+======================================================
+
+It is a tool used to build, run and ship multiple containers for application.
+It is used to create multiple containers in a single host.
+It used the YAML file to manage multi containers as a single service.
+The Compose file provides a way to document and configure all of the application’s service dependencies (databases, queues, caches, web service APIs, etc). 
+
+
+COMPOSE/DOCKER COMPOSE FILE: (yml=yaml)
+We provide details about services.
+ex: image, port, volume ----
+
+INSTALLATION:
+
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+ls /usr/local/bin/
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose version
+
+stop vs kill:
+it will wait a few sec to stop the running process
+it won't wait to stop the process 
+
+ vim docker-compose.yml
+-------------------------
+
+version: '3'
+services:
+  movies:
+    image: paymovies:v1
+    ports:
+      - "90:80"
+  train:
+    image: paytrain:v1
+    ports:
+      - "91:80"
+  dth:
+    image: paydth:v1
+    ports:
+      - "92:80"
+  recharge:
+    image: payrecharge:v1
+    ports:
+      - "93:80"
+==================================
+docker-composefile.yml
+-----------------------
+version: "3.8"
+
+services:
+   library-api:
+      restart: always
+      build:
+         context: ./server
+         dockerfile: Dockerfile
+      container_name: library_mern_nginx
+      # volumes allow sharing of data in run-time between host and container
+      volumes:
+         # don't overwrite this folder in container with the local one
+         - /app/node_modules
+         # map current local directory to the /app inside the container
+         #This is a must for development in order to update our container whenever a change to the source code is made. Without this, you would have to rebuild the image each time you make a change to source code.
+
+         - ./server:/app
+      ports:
+         - 5000:5000
+      depends_on:
+         - mongodb
+      environment:
+         NODE_ENV: ${NODE_ENV}
+         MONGO_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb
+      networks:
+         - library-mern-api
+
+   mongodb:
+      image: mongo
+      restart: always
+      ports:
+         - 27017:27017
+      environment:
+         MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+         MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      volumes:
+         # for persistence storage
+         - mongodb-data:/data/db
+      networks:
+         - library-mern-api
+
+      # mongo-express should only be used privately for development purposes.
+      # It helps us interact with a mongoDB database using our browser
+   mongo-express:
+      image: mongo-express
+      depends_on:
+         - mongodb
+      ports:
+         - 8081:8081
+      environment:
+         ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USERNAME}
+         ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
+         ME_CONFIG_MONGODB_SERVER: mongodb
+         ME_CONFIG_BASICAUTH_USERNAME: admin
+         ME_CONFIG_BASICAUTH_PASSWORD: admin123456
+      volumes:
+         - mongodb-data
+      networks:
+         - library-mern-api
+
+   client:
+      restart: always
+      build:
+         context: ./client
+         dockerfile: Dockerfile
+      container_name: library_mern_frontend
+      volumes:
+         - ./app/node_modules
+         - ./client:/app
+      # ports:
+      #    - 3000:3000
+      depends_on:
+         - library-api
+      networks:
+         - library-mern-api
+
+   nginx:
+      restart: always
+      depends_on:
+         - library-api
+         - client
+      build:
+         context: ./nginx
+         dockerfile: Dockerfile
+      ports:
+         - 8080:80
+      networks:
+         - library-mern-api
+
+networks:
+   library-mern-api:
+      driver: bridge
+
+volumes:
+   mongodb-data:
+      driver: local
+
+docker-compose up -d: to creat multipul container/services and run detatch mode.
+docker-compose down : to stop the multipul services .
+docker-compose -f docker-compose-file.yml: docker-compose file must be docker-compose.yml/ docker-composefile.yml if not we have use this command. 
+
+docker-compose images :we show the paticulry images are created by docker-composefile.
+docker-compose ps : to show the paticulary containers are created by docker-composefile.
+docker-compose logs : docker-copose file info.
+
+-----------------------------------
+17/7/23
+--------
+dockerhub
+-----------
+dockerimages store remote repository 
+
+docker tag image-name:vesion complete dockerthub repository
+docker login: to login dockerhub
+docker push image name :to copy image local to dockerhub
+docker pull image in repo: to get image dockerhub to local
+
+example
+---------
+  docker build -t img:v1 .
+    8  docker images
+    9  docker tag img:v1 rahamshaik/rahamnewapp
+   10  docker images
+   11  docker push rahamshaik/rahamnewapp
+   12  docker login 
+   13  docker push rahamshaik/rahamnewapp
+
+
+
+What is Docker Swarm?  to creat multipule containers on mulipule severs.
+
+
+ A Docker Swarm is a container orchestration tool running the Docker application.
+ It has been configured to join together in a cluster.
+ The activities of the cluster are controlled by a swarm manager, and machines that have joined the cluster are referred to as nodes.
+
+-we creating 3nodes/physical severs/3 instances
+ 1-manager node  2-working nodes
+
+ 1-manager node
+-----------------
+docker swarm init --advertise-addr 172.31.27.75(ip of manager node)
+we will get the token
+ 
+connection between the  manager and worker nodes
+------------------------------------------------
+
+copy token from manager nade and to past the worker nodes
+
+
+docker swarn service 
+-----------------------
+ To create a 6-replica service with no extra configuration, you only need to supply the image name. 
+ 
+ docker service create --name raham --replicas 6 --publish 80:80 rahamshaik/rahamnewapp:latest
+
+cammands
+----------
+1.docker services ls: to list all services
+
+2.docker nodes ls : to list all nodes.
+
+3.docker node rm node id :to remove the node
+
+4.docker service rm service-name: to remove the sevices.
+
+5.docker service scale raham2=10: to scale the sevices.
+
+6.docker swarn leave: node leave swarn sevice(working node)
+
+7.again working node connect manager node --to copy the token.
+
+***docker top conatainerid:to list the container inside processs. 
+
+docker stock: docker swarm + docker compose.
+-------------
+git+docker+jenkins+apache2 project
+-----------------------------------                   
+
+
+pipeline {
+    agent any
+
+    stages {
+        stage('git checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/banalanaveenkumar/dockerpro.git'
+            }
+        }
+        stage ('build') {
+            steps {
+                sh 'docker build -t $img .'
+            }
+        }
+        stage ('tag') {
+            steps {
+                sh 'docker tag $img $repo'
+            }
+        }
+        stage ('push') {
+            steps {
+                sh 'docker login -u banalanaveenkumar -p naveen123'
+                sh 'docker push $repo'
+            }
+        }
+        stage ('stack') {
+            steps {
+                sh 'docker stack deploy -c docker-compose.yml nani'
+            }
+        }
+    }
+    
+    
+}
+
+
+     
+
+dockerfile
+-----------
+FROM ubuntu
+RUN apt-get update -y
+RUN apt apache2 -y
+COPY index.html /var/www/html
+CMD ["usr/sbin/apachectl" "-D" "FOREGROUND"]
+
+
+Docker-compose.yml
+------------------
+
+version: '3'
+services:
+  movies:
+    image: banalanaveenkumar/movierepo
+    ports:
+      - "90:80"
+   deploy:
+     replicas: 3
+  train:
+    image: banalanaveenkumar/trainrepo 
+    ports:
+      - "91:80"
+     deploy:
+     replicas: 3
+  dth:
+    image: banalanaveenkumar/dthrepo
+    ports:
+      - "92:80"
+     deploy:
+     replicas: 3
+  recharge:
+    image: banalanaveenkumar/rechargerepo
+    ports:
+      - "93:80"
+    deploy:
+     replicas: 3
+
+dockerfile
+-----------
+FROM tomcat:8.0-alpine
+LABEL maintainer="satheeskumar.pmp@gmail.com"
+
+ADD sampleLogin.war /usr/local/tomcat/webapps/
+
+EXPOSE 8080
+CMD ["catalina.sh", "run"]
+
+
+
+Run a shell (e.g., bash) inside a running container:
+docker exec -it CONTAINER_NAME /bin/bash
+Run a single command inside a container:
+
+docker exec CONTAINER_NAME ls -l /path/to/directory
+
+
+jenkins integration with docker 
+-------------------------------
+we have getting docker.sock error
+
+we give the permission in jenkins in docker exuction.
+ 
+dockerproject folder : chmod 777 var/run/docker.sock
+systemctl daemon-reload
+systemctl start docker
+=========================================
+stack
+-------
+Stack - combination of one or more services, networks, vols
+Services - combination of one or more tasks
+Tasks - task is a definition to deploy a container
+Container - container is an instance of task
+
+docker swarm init --advertise-addr ip-address-of-manager
+docker swarm join -token SWMTKN-1 xxxxx
+docker node ls
+
+docker service create --name <service_name> --replicas=4 --publish 90:80 <image_name>
+docker service ls
+ docker service scale <service_name/id>=4
+
+docker stack deploy -c docker-compose.yml mern_stack
+docker stack ls
+docker stack services mern_stack
+docker stack ps mern_stack
+docker stack rm mern_stack
+
+docker network ls
+docker network create -d overlay network1
+docker network rm network1
+
+docker stats
+docker service logs service_name
+
+docker swarm leave
+docker node rm node name
+docker swarm leave --force - removes master
+
