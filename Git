@@ -1,0 +1,128 @@
+
+GIT:
+yum install git -y: to install git
+git init: to initialize .git repo (local repo)
+
+vim index.html (untracked)
+git status: show the stage of file
+git add index.html: to track index.html
+git commit -m "commit-1" index.html: to commit index.html
+git commit -v    : to show previous commits info in  files changes.
+git log: to show the commits 
+git log --oneline: to show logs on single line
+git log --oneline --graph --all :to show logs on single line with graph
+git log -2: shows recent 2 logs
+git log -5: shows recent 5 logs
+git show e6bde29: to show the files which is committed to it
+git show css1: to show which commit applied to file css1
+
+TO CONFIGURE USER & EMAIL:
+git config user.name "rahamshaik"
+git config user.email "rahamshaik@gmail.com"
+git log
+
+
+RESTORE: TRACK -- > UNTRACK
+
+touch file
+git status
+git add file1
+git status
+git restore --staged file1
+git status
+
+NOTE: It should not be committed.
+if you try to untrack the committed file we need to modify the file.
+
+ 
+BRANCH: It is an individual line of development.
+developers can develop the source code independently.
+Default branch -- > Master 
+master & main branches are called as long living branches
+dev, qa, hotfix, release branches are called as short-living branches.
+
+git branch: to list the branches
+git branch movies: to create a branch called movies
+git checkout movies: to switch to branch called movies
+git checkout -b recharge: to create and switch at a time.
+git branch -d movies : to delete a branch 
+
+
+
+
+MERGE: Used to merge file blw two branches
+
+git checkout master
+git merge movies
+git merge train
+git branch --merge : to show the merge branches
+git branch --no-merge:to show the   unmerge branches 
+
+
+
+REBASE: Used to merge file blw two branches         ***   pulling:used in merging files blw two branchs in github
+git rebase recharge
+git rebase dth
+
+revart :Used to unmerge file blw two branches
+git revart recharge
+
+git config --global alias.allcommits "log --oneline --graph --all" : used to short command insted of write all command
+
+git stash : hide the uncommited files (tracked files only)
+git stash -u : to hide the untracked files
+
+git stash list : to show the stashed files
+git stash apply : unhide file latest hidefile
+git stash apply stash@{1} :unhide the partcular file
+git stash drop : remove the stashed latest file
+git stash pop :unhide fileand  unstashed  latest hidefile
+git stash branch oldidea :to creat branch at the stashed file 
+
+git clean -f : to delete files in untracked  in files
+git clean -fd :to delete files  in untracked  in directory/folder.
+git clean -f -d -x : to  delete files in untracked  in .ingnore file
+
+git tag
+----------
+tag is used to pointing patcular commits which are used for realase purpose. 
+
+git tag : to show the list of the tages
+git tag -a v1.0: to creat tag at lateast commit
+git tag -a v1.0 -m "v2.0" : to change tag name 
+git tag -d v1.0 : to delete the tag  
+
+git commit --amend -m "naveen" : to change latest change commit message
+
+git commit reset 07565 : paticular commit delete
+
+git update -ref -d HEAD : to delete the latest commite 
+
+
+What is a rebase in git?
+
+Rebasing is the process of moving or combining a sequence of commits to a new base commit. Rebasing is most useful and easily visualized in the context of a feature branching workflow.
+
+What is the use of cherry pick in git?
+
+git cherry-pick is a powerful command that enables arbitrary Git commits to be picked by reference and appended to the current working HEAD. Cherry picking is the act of picking a commit from a branch and applying it to another. git cherry-pick can be useful for undoing changes.
+   
+date :13/6/23  1:00:00
+---------------------
+copy file one server to another sever
+
+1. step1: set  password rootuser
+   
+passwd root
+
+2.  step2:sshconfig file edit
+   vim /etc/ssh/sshd-config
+   line 38- uncommite permiting root
+   line 63- loging root with passward
+
+    systemctl restart sshd
+    systemctl status sshd
+camand 
+-----
+ scp -r filepath root@ipaddress :second server requried path
+  scp -i file1 root@12.22.1.2 :/naveen/nani
