@@ -1,0 +1,519 @@
+03-07-2023 DAY-01: INTRO, SETUP, INVENTORY & ADHOC
+ANSIBLE:
+It's an automation configuration and management tool.
+
+configuration: hardware & software pros
+Management: update, install, uninstall ---
+
+ ***note:- ansible is agentless because pip only agent server or other severs not installed the pip-python
+
+code: yaml language (Yet another markup Language)
+year: 2012 -- > miache1 dehann -- > dependency: python 
+
+INFRA: Resources used to run our application on the cloud.
+ex: servers, vpc, asg, elb -----
+
+SETUP:
+ALL SERVERS: to communicate with all servers
+hostnamectl set-hostname ansible   #(for identifing the servers)
+sudo -i
+passwd root                #(root user to login to diffrent severs)-----------1
+
+vim /etc/ssh/sshd_config            #(to give permision to servers)-----------2
+38: PermitRootLogin yes  # uncomment
+63: PasswordAuthentication yes
+
+systemctl restart sshd   }----------3
+systemctl status sshd
+--------------------------
+ANSIBLE SERVER:
+
+amazon-linux-extras install ansible2 -y
+yum install python python-pip python-level -y
+vim /etc/ansible/hosts     #( declaring the groups in hosts)-----------1
+
+[dev]
+172.31.86.81
+172.31.82.63
+
+[test]
+172.31.95.156
+172.31.83.100
+
+vim /etc/ansible/ansible.cfg (uncomment 14 & 22)  #(inventery &root)------2
+--------------------------------------------------------------------------
+SSH CONNECTIONS: ANSIBLE SERVER
+
+ssh-keygen  --- > 4 ENTERS    #(to generate the publickey&privatekey for root) (if we want particular users & to switch user and  give the cammnd)
+
+ssh-copy-id root@172.31.82.63 --- > yes --- > password     #(copy the public key in (root@172.31.82.63) this server) 
+
+ssh 172.31.82.63    #(to connect the second server(172.31.82.63))         
+
+ctrl + d (logout)
+
+Note: If you do not log out and try to connect to the new server it won't connect
+
+Connect all the servers in this way
+
+cd .ssh --- > cat known_hosts       #(to identfing the how many servers are connect this server)
+====================================================================================================
+
+INVENTORY HOST PATTERN:
+
+ansible all --list-hosts          # shows all the servers
+ansible all[1] --list-hosts       # shows the 2nd server of all 
+ansible dev --list-hosts          # shows the dev server only
+ansible test --list-hosts         # shows the test server only
+ansible test[1] --list-hosts      # shows the test 2nd server only
+ansible all[1:3] --list-hosts     # shows server 2 to server 4
+ansible all[-1] --list-hosts      # shows the last server
+ansible all[-3] --list-hosts      # shows the last 3rd server
+
+====================================================================================================
+
+WORKING WITH ANSIBLE:
+
+1. ADHOC: SIMPLE LINUX COMMANDS USED FOR ONLY ONCE WORKS
+
+ansible all -a "ls"
+ansible: command line tool
+all  : servers 
+-a : arguments 
+ls : linux commands
+
+
+ansible all -a "touch file1"
+ansible all -a "yum install git -y"
+ansible all -a "yum install httpd -y"
+ansible all -a "systemctl start httpd -y"
+ansible all -a "systemctl start httpd"
+ansible all -a "systemctl status httpd"
+ansible all -a "useradd raham"
+ansible all -a "cat /etc/passwd"
+
+ ansible -m ping all  #(to check the all severs running or not)
+ ansible -m ping dev  #(to check the dev severs running or not)
+
+====================================================================================================
+
+04-07-2023 DAY-02: MODULES, PLAYBOOKS
+
+2. MODULES: it is in the key-value format.
+ex: Name: raham 
+    Loc: Hyderabad
+it is reusable.
+
+
+ADHOC:  ansible all -a "yum install git -y"
+MODULE: ansible all -m yum -a "pkg=git state=present"   
+
+ansible all -m yum -a "pkg=git state=present" 
+ansible all -m yum -a "pkg=tree state=present" 		#(present=install)
+ansible all -m yum -a "pkg=tree state=latest"  		#(latest=update)
+ansible all -m yum -a "pkg=tree state=absent"  		#(absent=uninstall)
+ansible all -m yum -a "name=httpd state=present"
+ansible all -m service -a "name=httpd state=restarted"  #(restarted=restart)
+ansible all -m service -a "name=httpd state=stopped"    #(stopped=stop)
+ansible all -m user -a "name=vijayk state=present"
+
+Limitation:
+1. we cannot reuse the modules.
+2. we cannot execute multiple modules.
+
+PLAYBOOK:
+It's a collection of modules.
+here we can use multiple modules & we can reuse it.
+playbook is written on yaml language.
+it works on key-value and its extension (yaml/yml)
+
+
+ansible all -m yum -a "name=git state=present"   
+
+- hosts: all
+  tasks:
+    - name: Installing git
+      yum: name=git state=present
+
+
+- hosts: all
+  tasks:
+    - name: installing git
+      yum: name=git state=absent
+
+MULTITASKS:
+
+- hosts: all
+  tasks:
+    - name: installing httpd
+      yum: name=httpd state=present
+
+    - name: restarting httpd
+      service: name=httpd state=restarted
+
+    - name: create a user
+      user: name=rajini state=present
+========================================
+05-07-2023: day-03 -- > RAW, COMMAND, SHELL, TAGS VARIABLES & GATHERFACTS
+
+SHELL VS COMMAND VS RAW:
+The command modules execute commands on the target machine without using the target shell, it simply executes the command. The target shell is for example the popular bash , zsh , or sh .
+
+16
+
+command: executes a remote command on the target host, in the same shell of other playbook's tasks.
+It can be used for launch scripts (.sh) or for execute simple commands. For example:
+
+- name: Cat a file
+  command: cat somefile.txt
+
+- name: Execute a script
+  command: somescript.sh param1 param2
+
+shell: executes a remote command on the target host, opening a new shell (/bin/sh).
+It can be used if you want to execute more complex commands, for example, commands concatenated with pipes. For example:
+
+- name: Look for something in a file
+  shell: cat somefile.txt | grep something
+
+raw: executes low-level commands where the interpreter is missing on the target host, a common use case is for installing python. This module should not be used in all other cases (where command and shell are suggested)
+
+- hosts: all
+  tasks:
+    - name: task-1
+      yum: name=git state=present
+
+    - name: task-2
+      shell: yum install httpd -y
+
+    - name: task-3
+      command: yum install tree -y
+
+    - name: task-4
+      raw: yum install java-1.8.0-openjdk -y
+- hosts: all
+  tasks:
+    - name: task-1
+      yum: name=git state=absent
+
+    - name: task-2
+      command: yum remove httpd* -y
+
+    - name: task-3
+      command: yum remove tree* -y
+
+    - name: task-4
+      command: yum remove java-1.8.0-openjdk* -y
+
+--------------------------
+TAGS: it will execute/skip the particular task among multiple tasks.
+
+- hosts: all
+  tasks:
+    - name: task-1
+      yum: name=git state=present
+      tags: a
+
+    - name: task-2
+      shell: yum install httpd -y
+      tags: b
+
+    - name: task-3
+      command: yum install tree -y
+      tags: c
+
+    - name: task-4
+      raw: yum install java-1.8.0-openjdk -y
+      tags: d
+
+SINGLE TAG: ansible-playbook raham.yml --tags b
+MULTI TAGS: ansible-playbook raham.yml --tags b,c
+SKIP TAGS: ansible-playbook raham.yml --skip-tags "c"
+MULTI SKIP TAGS: SKIP TAGS: ansible-playbook raham.yml --skip-tags "c,d"
+
+VARIABLES: These will vary and it will store the value.
+
+DYNAMIC VARS: The vars which can be passed outside of the playbook during execution.
+SINGLE VARIABLE:
+- hosts: all
+  tasks:
+    - name: task-1
+      yum: name={{a}} state=present
+
+ansible-playbook raham.yml --extra-vars "a=tree"
+ansible-playbook raham.yml --extra-vars "a=docker"
+ansible-playbook raham.yml --extra-vars "a=java-1.8.0-openjdk"
+
+- hosts: all
+  tasks:
+    - name: task-1
+      yum: name={{a}} state=present
+    - name: task-2
+      yum: name={{b}} state=present
+ansible-playbook raham.yml --extra-vars "a=tree b=docker"
+
+STATIC VARIABLE: These variables are declared inside the playbook.
+
+- hosts: all
+  vars:
+    a: git
+    b: maven
+  tasks:
+    - name: task-1
+      yum: name={{a}} state=present
+    - name: task-2
+      yum: name={{b}} state=present
+
+- hosts: all
+  vars:
+    a: git
+    b: maven
+  tasks:
+    - name: task-1
+      yum: name={{a}} state=present
+      yum: name={{b}} state=present
+
+STOPPING FACTS:
+
+- hosts: all
+  gather_facts: false
+  vars:
+    a: git
+    b: maven
+  tasks:
+    - name: task-1
+      yum: name={{a}} state=present
+      yum: name={{b}} state=present
+===================================================================================================
+06-7-2023 day-04: conditions, handlsers, lopps, roles and galaxy
+
+CLUSTER: group of nodes/servers.
+HOMOGENIUS CLUSTER: All servers are same flavour.
+HETROGENIS CLUSTER: All servers are different flavour.
+
+CONDITIONS: 
+
+- hosts: all
+  tasks:
+    - name: task-1
+      command: yum install tree -y
+      when: ansible_os_family == "RedHat"
+
+    - name: task-2
+      command: apt install tree -y
+      when: ansible_os_family == "Debian"
+example:2
+----------
+to edit the inventory file
+-----------------------
+[all:vars]
+ansible_user=student1
+ansible_ssh_pass=xxx
+ansible_port=22
+
+[web]
+node1 ansible_host=11.22.33.44
+node2 ansible_host=22.33.44.55
+node3 ansible_host=33.44.55.66
+
+[ftpserver]
+node2 ansible_host=22.33.44.55
+
+[control]
+ansible ansible_host=44.55.66.77
+---
+main.yml file
+------------
+- name: Install vsftpd on ftpservers
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install FTP server when host in ftpserver group
+      yum:
+        name: vsftpd
+        state: latest
+      when: inventory_hostname in groups["ftpserver"]
+
+
+LOOPS: It will do operation recursively.
+-------------------------------------
+
+- hosts: all
+  tasks:
+    - name: task1
+      yum: name={{item}} state=present
+      with_items:
+        - git
+        - maven
+        - docker
+        - tree
+        - java-1.8.0-openjdk
+
+
+- hosts: all
+  tasks:
+    - name: task2
+      user: name={{item}} state=present
+      with_items:
+        - vijay
+        - kiran
+        - bheem
+        - reviii
+        - jayshaa
+=============================================================
+ROLES:
+--------------------------------------
+In Ansible, the role is the primary mechanism for breaking a playbook into multiple files. This simplifies writing complex playbooks, and it makes them easier to reuse.
+
+* It will create a directory structure for our playbooks.
+* it will encapsulate the playbook.
+* it will be used for the community as well.
+
+[root@ansible playbooks]# cat master.yml
+- hosts: all
+  roles:
+    - abc
+    - rolea
+
+cat roles/rolea/tasks/main.yml
+- name: task1
+  yum: name={{item}} state=absent
+  with_items:
+    - git
+    - maven
+    - docker
+    - tree
+    - java-1.8.0-openjdk
+cat roles/abc/tasks/main.yml
+---
+- name: task2
+  user: name={{item}} state=absent
+  with_items:
+    - vijay
+    - kiran
+    - bheem
+    - reviii
+    - jayshaa
+
+
+GALAXY: it will store the roles of multiple users in a central place.
+
+ansible-galaxy search java
+ansible-galaxy install baztian.java
+ansible-galaxy search --author baztian
+
+==================================================================================
+
+DEBUG: Used to print the message
+
+- hosts: all
+  tasks:
+    - name: printing a msg
+      debug:
+        msg: "hello world"
+
+
+Redhat: yum/rpm
+Ubuntu: apt/apt-get
+Python: pip module
+
+Numpy & Pandas -- > libs 
+
+ansible all -a "yum install pip -y"
+- hosts: all
+  tasks:
+    - name: task-1
+      pip:
+        name: NumPy
+
+- hosts: all
+  tasks:
+    - name: task-1
+      pip:
+        name: Pandas
+
+COPY MODULE:
+ansible all -m copy -a "src=app.yml dest=/tmp"
+
+- hosts: all
+  tasks:
+    - name: copying the file
+      copy: src=app.yml dest=/root
+VAULT: 
+1. It can encrypt the data.
+2. It can restrict the user to run/access the playbook
+-----------------------------------------------------
+Ansible Vault is an Ansible feature that helps you encrypt confidential information without compromising security. Ansible is a configuration management tool. While working with Ansible, you can create various playbooks, inventory files, variable files, etc.
+
+ansible-vault create creds.txt: to create a vault file
+ansible-vault edit creds.txt: to edit a vault file
+ansible-vault rekey creds.txt: to change the password for a vault file
+ansible-vault decrypt creds.txt: to decrypt the data in the vault file
+ansible-vault encrypt creds.txt: to encrypt the data in the vault file
+ansible-vault view creds.txt: to show the data without decrypt
+
+DEPLOYMENT: 1
+-----------
+
+- hosts: test
+  tasks:
+    - name: installing apache server
+      yum: name=httpd state=present
+
+    - name: activating apache server
+      service: name=httpd state=started
+
+    - name: git checkout
+      git:
+        repo: "https://github.com/CleverProgrammers/pwj-netflix-clone.git"
+        dest: "var/www/html"
+
+SETUP MODULE: To fetch the node information
+ansible -m setup dev[0]
+ansible -m setup dev[0] | grep -i hostname
+
+DEPLOYMENT:2 TOMCAT
+----------
+
+- hosts: dev
+
+  tasks:
+    - name: download tomcat from dlcdn
+      get_url:
+        url: "https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.70/bin/apache-tomcat-9.0.70.tar.gz"
+        dest: "/root/"
+
+    - name: untar the apache file
+      command: tar -zxvf apache-tomcat-9.0.70.tar.gz
+        #unarchive:
+        #src: "apache-tomcat-9.0.70.tar.gz"
+        #dest: "/root/"
+
+    - name: rename the tomcat
+      command: mv apache-tomcat-9.0.70 tomcat
+      tags: abc
+
+    - name: install java
+      command: yum install java-1.8.0-openjdk -y
+
+    - name: setting the roles in tomcat-user.xml file
+      template:
+        src: tomcat-users.xml
+        dest: /root/tomcat/conf/tomcat-users.xml
+    - name: delete two lines in context.xml
+      template:
+        src: context.xml
+        dest: /root/tomcat/webapps/manager/META-INF/context.xml
+
+    - name: start the tomcat
+      shell: nohup /root/tomcat/bin/startup.sh
+===================================================
+What is Ansible template module?
+Ansible templates allow you to create files dynamically by interpolating variables or using logical expressions such as conditionals and loops. It's useful to define configuration files that adapt to different contexts without having to manage additional files.01-Sept-2021
+
+
+
+
+
+
+
